@@ -11,30 +11,33 @@ import {
 const FullScreen = NativeModules.FullScreen
 export default FullScreen;
 
-import debounce from 'debounce';
+import _ from 'lodash';
 
 export class ToggleView extends Component {
-  constructor(props,context){
-    super(props,context)
+  constructor(props, context) {
+    super(props, context)
     this.state = {
-      focus:this.props.focus||true
+      focus: this.props.focus || true,
+      alwaysFullScreen: this.props.alwaysFullScreen && true
     }
-    this.offFullScreen = debounce(FullScreen.offFullScreen,250);
-    this.delayHide = debounce(() => {
-        FullScreen.onFullScreen();
-        this.setState({focus:false});
-    },this.props.delay || 3000);
+    this.offFullScreen = _.debounce(FullScreen.offFullScreen, 250);
+    this.delayHide = _.debounce(() => {
+      FullScreen.onFullScreen();
+      this.setState({ focus: false });
+    }, this.props.delay || 3000);
   }
 
-  handlePress (){
-    if(this.state.focus){
-      FullScreen.onFullScreen();
-      this.setState({focus:!this.state.focus})
-    }
-    else {
-      this.offFullScreen();
-      if(this.props.delayHide !== false)
-        this.delayHide();
+  handlePress() {
+    if (!this.state.alwaysFullScreen) {
+      if (this.state.focus) {
+        FullScreen.onFullScreen();
+        this.setState({ focus: !this.state.focus })
+      }
+      else {
+        this.offFullScreen();
+        if (this.props.delayHide !== false)
+          this.delayHide();
+      }
     }
   }
 
@@ -43,7 +46,7 @@ export class ToggleView extends Component {
       <TouchableWithoutFeedback
         onPress={this.handlePress.bind(this)}>
         <View style={this.props.style}>
-          {React.Children.map(this.props.children, el=>el)}
+          {React.Children.map(this.props.children, el => el)}
         </View>
       </TouchableWithoutFeedback>
     );
